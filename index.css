@@ -1,0 +1,27 @@
+.container{
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 1.3rem;
+}
+
+.vragen-lijst{
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.vragen{
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.footer-text{
+    text-align: center;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 0.2rem 0.3rem;
+    font-size: 1rem;
+    margin-bottom: 0.6rem;
+    margin-top: 0.6rem;
+}
