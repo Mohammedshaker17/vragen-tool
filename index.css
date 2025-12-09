@@ -1,27 +1,66 @@
-.container{
-    max-width: 600px;
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.container {
+    max-width: 750px;
     margin: 0 auto;
-    font-size: 1.3rem;
+    border-radius: 8px;
 }
 
-.vragen-lijst{
-    max-width: 600px;
-    margin: 0 auto;
+label {
+    font-weight: 600;
+    font-size: 18px;
 }
 
-.vragen{
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
-}
-
-.footer-text{
-    text-align: center;
-}
-
-input[type="text"] {
+input[type="text"], input[type="email"], textarea {
     width: 100%;
-    padding: 0.2rem 0.3rem;
-    font-size: 1rem;
-    margin-bottom: 0.6rem;
-    margin-top: 0.6rem;
+    padding: 6px;
+    margin: 6px 0 12px;
+}
+
+.vraag {
+    margin-bottom: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    border-radius: 6px;
+}
+
+button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #a02b64;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.95;
+}
+
+.chart-controls {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+canvas {
+    margin-top: 12px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#message {
+    color: green;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+#radarChart {
+    width: auto !important;
+    height: 700px !important;
 }
