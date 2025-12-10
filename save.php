@@ -1,4 +1,6 @@
 <?php
+/* Verwerkt en slaat enquête antwoorden op in de database */
+
 require_once __DIR__ . '/database.php';
 header("Content-Type: application/json");
 

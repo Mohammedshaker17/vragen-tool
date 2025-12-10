@@ -1,4 +1,6 @@
 <?php
+/* API endpoint om alle beschikbare klassen op te halen */
+
 header('Content-Type: application/json');
 require_once __DIR__ . '/database.php';
 

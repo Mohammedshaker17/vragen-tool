@@ -1,4 +1,4 @@
-/* CSS voor het studentenenquête formulier (views/index.php) */
+/* CSS voor de admin en login pagina's (views/admin.php en login.php) */
 
 body {
     font-family: Arial, sans-serif;
@@ -16,17 +16,16 @@ label {
     font-size: 18px;
 }
 
-input[type="text"], input[type="email"], textarea, select {
+#input-soort {
     width: 100%;
     padding: 6px;
     margin: 6px 0 12px;
 }
 
-.vraag {
-    margin-bottom: 12px;
-    background: rgba(255, 255, 255, 0.8);
-    padding: 8px;
-    border-radius: 6px;
+#selecteer-klas {
+    width: 20%;
+    padding: 6px;
+    margin: 6px 0 12px;
 }
 
 button {
@@ -42,8 +41,14 @@ button:hover {
     opacity: 0.95;
 }
 
-#message {
-    color: green;
-    font-weight: 700;
-    margin-top: 8px;
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    padding: 8px;
+    margin: 4px 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 4px;
 }

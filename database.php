@@ -1,4 +1,6 @@
 <?php
+/* Database connectie configuratie voor MySQL */
+
 require_once __DIR__ . '/config.php';
 
 $host = '127.0.0.1';

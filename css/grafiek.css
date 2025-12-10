@@ -1,0 +1,50 @@
+/* CSS voor de grafiek pagina's (grafiek.php en views/docent.php) */
+
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+}
+
+.container {
+    max-width: 750px;
+    margin: 0 auto;
+    border-radius: 8px;
+}
+
+label {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+select {
+    width: 100%;
+    padding: 6px;
+    margin: 6px 0 12px;
+}
+
+.chart-controls {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+canvas {
+    margin-top: 12px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#radarChart {
+    width: auto !important;
+    height: 750px !important;
+    max-height: 750px !important;
+    min-height: 750px !important;
+    display: block;
+}
+
+#compareLabel {
+    font-weight: 600;
+    color: #333;
+}

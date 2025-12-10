@@ -1,4 +1,6 @@
 <?php
+/* Hoofdformulier voor studenten om de enquête in te vullen over studentregie */
+
 require_once __DIR__ . '/../config.php';
 
 if (isset($_COOKIE['submission_id'])) {

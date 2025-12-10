@@ -1,4 +1,6 @@
 <?php
+/* API endpoint om scores en gemiddelden van een student op te halen */
+
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/database.php';
 

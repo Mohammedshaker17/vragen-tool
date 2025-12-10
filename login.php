@@ -1,4 +1,6 @@
 <?php
+/* Login pagina voor docenten en admins */
+
 session_start();
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/database.php';
@@ -33,7 +35,7 @@ if (isset($_POST['username'], $_POST['password'])) {
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Login</title>
-    <link rel="stylesheet" href="<?php echo url('css/index.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('css/admin.css'); ?>">
 </head>
 <body>
 <div class="container">
@@ -43,11 +45,21 @@ if (isset($_POST['username'], $_POST['password'])) {
     <?php endif; ?>
     <form method="post">
         <label>Gebruikersnaam:</label><br>
-        <input type="text" name="username" required><br>
+        <input id="input-soort" type="text" name="username" required><br>
         <label>Wachtwoord:</label><br>
-        <input type="password" name="password" required><br>
+        <input id="input-soort" type="password" name="password" required><br>
         <button type="submit">Inloggen</button>
     </form>
 </div>
+
 </body>
 </html>
+
+<style>
+    #input-soort{
+        width: 50%;
+        padding: 8px;
+        margin: 8px 0;
+        box-sizing: border-box;
+    }
+</style>

@@ -1,7 +1,8 @@
 <?php
+/* Admin pagina voor het beheren van docenten accounts */
+
 session_start();
 
-// Include config from parent directory (we're in views/ folder)
 require_once __DIR__ . '/../config.php';
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] != "admin") {
@@ -27,27 +28,28 @@ $classes = $stmt->fetchAll(PDO::FETCH_COLUMN);
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Admin</title>
-    <link rel="stylesheet" href="<?php echo url('css/index.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('css/admin.css'); ?>">
 </head>
 <body>
 <div class="container">
-    <h1>Admin: docenten beheren</h1>
+    <h1>Welkom admin.</h1>
+    <h3>Hier kan jij accounts aanmaken voor de docenten, en die verbinden aan de klassen zodat de docent hun klas grafiek kan bekijken.</h3>
     <form method="post">
-        <label>Gebruikersnaam:</label><br>
-        <input name="username" required><br>
+        <label>Kies een gebruikersnaam:</label><br>
+        <input id="input-soort" name="username" required><br>
 
-        <label>Wachtwoord:</label><br>
-        <input name="password" type="password" required><br>
+        <label>Maak een wachtwoord:</label><br>
+        <input id="input-soort" name="password" type="password" required><br>
 
-        <label>Klas:</label><br>
-        <select name="class" required>
+        <label>Verbind de docent met een klas:</label><br>
+        <select id="selecteer-klas" name="class" required>
             <option value="">-- Selecteer klas --</option>
             <?php foreach ($classes as $c): ?>
                 <option value="<?php echo htmlspecialchars($c); ?>"><?php echo htmlspecialchars($c); ?></option>
             <?php endforeach; ?>
         </select><br>
 
-        <button type="submit">Docent toevoegen</button>
+        <button type="submit">Docent account aanmaken</button>
     </form>
 
     <h2>Bestaande docenten</h2>

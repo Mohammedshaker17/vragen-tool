@@ -1,3 +1,5 @@
+/* JavaScript voor views/index.php - genereert enquêtevragen en verwerkt formulier inzending */
+
 const answerOptions = [
     {label: "Ja, meestal wel", value: 5},
     {label: "Soms, maar ik zou dat graag meer willen.", value: 3},

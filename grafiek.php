@@ -1,4 +1,6 @@
 <?php
+/* Toont de persoonlijke grafiek van een student met optie om te vergelijken met klasgemiddelde */
+
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/database.php';
 
@@ -28,7 +30,7 @@ if ($submission_id) {
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Jouw grafiek</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="<?php echo url('css/index.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('css/grafiek.css'); ?>">
 </head>
 <body>
 <div class="container">

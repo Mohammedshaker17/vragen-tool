@@ -1,3 +1,5 @@
+/* JavaScript voor views/docent.php - toont student grafieken met klasgemiddelde */
+
 let radarChart = null;
 
 async function loadChart(name) {

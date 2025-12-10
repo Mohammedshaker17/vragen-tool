@@ -1,7 +1,8 @@
 <?php
+/* Overzichtspagina voor docenten om studenten uit hun klas te selecteren en grafieken te bekijken */
+
 session_start();
 
-// Include config from parent directory (we're in views/ folder)
 require_once __DIR__ . '/../config.php';
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] != "docent") {
@@ -20,13 +21,14 @@ $students = $stmt->fetchAll(PDO::FETCH_COLUMN);
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Docent overzicht</title>
+    <title>Klassen overzicht</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="<?php echo url('css/index.css'); ?>">
+    <link rel="stylesheet" href="<?php echo url('css/grafiek.css'); ?>">
 </head>
 <body>
 <div class="container">
-    <h1>Overzicht klas <?php echo htmlspecialchars($_SESSION['class']); ?></h1>
+    <h1 style="font-size: 3rem">Overzicht van klas <?php echo htmlspecialchars($_SESSION['class']); ?></h1>
+    <h1 style="font-size: 2rem">Vergelijk je studenten met elkaar.</h1>
     <select id="selectStudent">
         <option value="">-- Selecteer student --</option>
         <?php foreach ($students as $s): ?>
