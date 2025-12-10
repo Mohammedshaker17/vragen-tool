@@ -9,6 +9,13 @@ if (isset($_COOKIE['submission_id'])) {
     exit;
 }
 
+$stmt = $pdo->prepare("SELECT COUNT(*) FROM submissions WHERE student_name = ?");
+$stmt->execute([$_POST['student_name']]);
+if ($stmt->fetchColumn() > 0) {
+    echo json_encode(['success' => false, 'error' => 'Deze naam is al in gebruik.']);
+    exit;
+}
+
 $name = isset($_POST['student_name']) ? trim($_POST['student_name']) : '';
 $class = isset($_POST['student_klas']) ? trim($_POST['student_klas']) : '';
 $open_text = isset($_POST['open_text']) ? trim($_POST['open_text']) : '';
