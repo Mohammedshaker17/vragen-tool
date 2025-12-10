@@ -34,12 +34,14 @@ if ($submission_id) {
 </head>
 <body>
 <div class="container">
-    <h1>Jouw persoonlijke grafiek</h1>
+    <h1>Jouw persoonlijke grafiek:</h1>
     <p>
         Naam: <strong id="studentName"><?php echo htmlspecialchars($name); ?></strong><br>
     </p>
 
-    <label for="compareName">Vergelijk met klasgemiddelde:</label>
+    <label for="compareName">Vergelijk jouw grafiek met het klassen gemiddelde</label><br><br>
+    <label for="compareName">Note: er moeten meerdere studenten de lijst hebben ingevuld wilt er een gemiddelde uitkomen.<br><br>
+    Staat er nog geen gemiddelde? Refresh de pagina dan nadat andere studenten te lijst hebben verstuurd.</label>
     <select id="compareName">
         <option value="">Geen vergelijking</option>
         <?php if ($class): ?>

@@ -3,6 +3,7 @@
 
 session_start();
 
+require_once __DIR__ . '/../database.php';
 require_once __DIR__ . '/../config.php';
 
 if (!isset($_SESSION['role']) || $_SESSION['role'] != "admin") {
@@ -10,12 +11,18 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != "admin") {
     exit;
 }
 
-require_once __DIR__ . '/../database.php';
-
 if (isset($_POST['username'], $_POST['password'], $_POST['class'])) {
     $stmt = $pdo->prepare("INSERT INTO users (username,password,role,class) VALUES (?, ?, 'docent', ?)");
-    $stmt->execute([$_POST['username'], password_hash($_POST['password'], PASSWORD_DEFAULT), $_POST['class']]);
+    $stmt->execute([
+        $_POST['username'],
+        password_hash($_POST['password'], PASSWORD_DEFAULT),
+        $_POST['class']
+    ]);
+
+    header("Location: " . url("views/admin.php"));
+    exit;
 }
+
 
 $stmt = $pdo->query("SELECT username,class FROM users WHERE role='docent'");
 $docenten = $stmt->fetchAll();
@@ -33,7 +40,11 @@ $classes = $stmt->fetchAll(PDO::FETCH_COLUMN);
 <body>
 <div class="container">
     <h1>Welkom admin.</h1>
-    <h3>Hier kan jij accounts aanmaken voor de docenten, en die verbinden aan de klassen zodat de docent hun klas grafiek kan bekijken.</h3>
+    <form method="post" action="<?php echo url('logout.php'); ?>" style="margin-top:16px;">
+        <button type="submit">Uitloggen</button>
+    </form>
+    <h3>Hier kan jij accounts aanmaken voor de docenten, en die verbinden aan de klassen zodat de docent hun klas
+        grafiek kan bekijken.</h3>
     <form method="post">
         <label>Kies een gebruikersnaam:</label><br>
         <input id="input-soort" name="username" required><br>
@@ -58,6 +69,7 @@ $classes = $stmt->fetchAll(PDO::FETCH_COLUMN);
             <li><?php echo htmlspecialchars($d['username']); ?> - <?php echo htmlspecialchars($d['class']); ?></li>
         <?php endforeach; ?>
     </ul>
+
 </div>
 </body>
 </html>

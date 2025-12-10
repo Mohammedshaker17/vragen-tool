@@ -51,7 +51,6 @@ if (isset($_POST['username'], $_POST['password'])) {
         <button type="submit">Inloggen</button>
     </form>
 </div>
-
 </body>
 </html>
 

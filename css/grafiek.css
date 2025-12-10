@@ -38,9 +38,9 @@ canvas {
 
 #radarChart {
     width: auto !important;
-    height: 750px !important;
-    max-height: 750px !important;
-    min-height: 750px !important;
+    height: 600px !important;
+    max-height: 600px !important;
+    min-height: 600px !important;
     display: block;
 }
 
