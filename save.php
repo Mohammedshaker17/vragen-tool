@@ -1,25 +1,9 @@
 <?php
-$host = '127.0.0.1';
-$db = 'studentregie';
-$user = 'root';
-$pass = 'Nick2008!';
-$charset = 'utf8mb4';
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-];
+require_once __DIR__ . '/database.php';
 header("Content-Type: application/json");
 
-try {
-    $pdo = new PDO($dsn, $user, $pass, $options);
-} catch (Exception $e) {
-    echo json_encode(['error' => 'DB connect failed']);
-    exit;
-}
-
-if (isset($_COOKIE['submitted'])) {
-    echo json_encode(['error' => 'Je hebt dit formulier al ingevuld. Probeer het later opnieuw.']);
+if (isset($_COOKIE['submission_id'])) {
+    echo json_encode(['error' => 'Je hebt dit formulier al ingevuld.']);
     exit;
 }
 
@@ -31,6 +15,7 @@ if (!empty($_POST['responses'])) {
     $decoded = json_decode($_POST['responses'], true);
     if (is_array($decoded)) $responses = $decoded;
 }
+
 if ($name === '' || $class === '' || count($responses) < 16) {
     echo json_encode(['error' => 'Naam, klas of antwoorden ontbreken.']);
     exit;
@@ -45,14 +30,11 @@ try {
     foreach ($responses as $qnum => $val) {
         $rstmt->execute([$submission_id, $qnum, $val]);
     }
+
     $pdo->commit();
-    setcookie("submitted", "1", time() + 60 * 60 * 12);
-    echo json_encode([
-        'success' => true,
-        'submission_id' => (int)$submission_id,
-        'name' => $name,
-        'class' => $class
-    ]);
+    setcookie("submission_id", $submission_id, time() + 60 * 60 * 24 * 30, "/");
+    echo json_encode(['success' => true, 'submission_id' => (int)$submission_id, 'name' => $name, 'class' => $class]);
+
 } catch (Exception $e) {
     $pdo->rollBack();
     echo json_encode(['error' => 'Opslaan mislukt']);

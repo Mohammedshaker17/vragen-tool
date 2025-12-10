@@ -59,7 +59,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     }
     form.set("responses", JSON.stringify(responses));
 
-    const resp = await fetch("../save.php", {
+    const resp = await fetch(BASE_URL + "/save.php", {
         method: "POST",
         body: form
     });
@@ -68,7 +68,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
 
     if (data.success) {
         const name = encodeURIComponent(form.get("student_name"));
-        window.location.href = "../grafiek.php?name=" + name;
+        window.location.href = BASE_URL + "/grafiek.php?name=" + name;
     } else {
         alert("Fout: " + (data.error || "Onbekend probleem"));
         btn.disabled = false;
@@ -77,7 +77,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
 });
 
 async function loadClasses() {
-    const resp = await fetch("../get_classes.php");
+    const resp = await fetch(BASE_URL + "/get_classes.php");
     const data = await resp.json();
     const select = document.getElementById("student_klas");
     select.innerHTML = "<option value=''>-- Kies je klas --</option>";

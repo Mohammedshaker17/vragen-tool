@@ -1,10 +1,19 @@
+<?php
+require_once __DIR__ . '/../config.php';
+
+if (isset($_COOKIE['submission_id'])) {
+    $submission_id = (int)$_COOKIE['submission_id'];
+    header("Location: " . url("grafiek.php?submission_id=$submission_id"));
+    exit;
+}
+?>
 <!doctype html>
 <html lang="nl">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Studentregie op leerproces</title>
-    <link rel="stylesheet" href="../index.css">
+    <link rel="stylesheet" href="<?php echo url('css/index.css'); ?>">
 </head>
 <body>
 <div class="container">
@@ -31,6 +40,9 @@
     <p id="message"></p>
 </div>
 
-<script src="../index.js"></script>
+<script>
+    const BASE_URL = '<?php echo BASE_URL; ?>';
+</script>
+<script src="<?php echo url('js/index.js'); ?>"></script>
 </body>
 </html>
