@@ -1,8 +1,6 @@
 let radarChart = null;
 
 async function loadChart(selectedNames) {
-    // Remove this line:
-    // if (!selectedNames || selectedNames.length === 0) selectedNames = ["__average__"];
     const datasets = [];
     const dims = ["C", "A", "R", "E"];
     const labels = ["Competentie", "Autonomie", "Relatie", "Engagement"];
@@ -64,7 +62,6 @@ async function loadChart(selectedNames) {
     });
 }
 
-// On page load, only "Gemiddelde klas" is checked
 window.addEventListener("DOMContentLoaded", function () {
     const checkboxes = document.querySelectorAll("#studentCheckboxes input[type=checkbox]");
     checkboxes.forEach(cb => {
@@ -73,8 +70,7 @@ window.addEventListener("DOMContentLoaded", function () {
     loadChart(["__average__"]);
 });
 
-// Update chart on checkbox change
 document.getElementById("studentCheckboxes").addEventListener("change", function () {
     const checked = Array.from(this.querySelectorAll("input[type=checkbox]:checked")).map(cb => cb.value);
-    loadChart(checked); // No fallback!
+    loadChart(checked);
 });

@@ -1,5 +1,5 @@
 <?php
-/* API endpoint om scores en gemiddelden van een student op te halen */
+/* API endpoint om scores en gemiddelden van een student op te halen (nieuwe database structuur) */
 
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/database.php';
@@ -13,21 +13,21 @@ if ($name === '') {
 
 try {
     if ($name === '__average__') {
-        // For docenten: get class from session
         session_start();
-        if (!isset($_SESSION['class'])) {
+        if (!isset($_SESSION['classes_id'])) {
             echo json_encode(['error' => 'No class in session']);
             exit;
         }
-        $student_class = $_SESSION['class'];
-        $avgQuery = "SELECT qm.dimension AS dim, AVG(r.value) AS avg_value
+        $classes_id = $_SESSION['classes_id'];
+
+        $avgQuery = "SELECT q.dimension AS dim, AVG(r.value) AS avg_value
                      FROM responses r
-                     JOIN question_map qm ON r.question_number = qm.question_number
-                     JOIN submissions s ON r.submission_id=s.id
-                     WHERE s.student_class=?
-                     GROUP BY qm.dimension";
+                     JOIN questions q ON r.questions_idquestions = q.id
+                     JOIN submissions s ON r.submission_id = s.id
+                     WHERE s.classes_id = ?
+                     GROUP BY q.dimension";
         $astmt = $pdo->prepare($avgQuery);
-        $astmt->execute([$student_class]);
+        $astmt->execute([$classes_id]);
         $overall = ['C' => 0, 'A' => 0, 'R' => 0, 'E' => 0];
         while ($ar = $astmt->fetch()) {
             $overall[strtoupper($ar['dim'])] = round((float)$ar['avg_value'], 2);
@@ -36,43 +36,59 @@ try {
         exit;
     }
 
-    // For a student: get latest submission
-    $stmt = $pdo->prepare("SELECT id, student_class, created_at FROM submissions WHERE student_name=? ORDER BY id DESC LIMIT 1");
+    $stmt = $pdo->prepare("
+        SELECT s.id, s.classes_id, s.created_at, c.class_name 
+        FROM submissions s
+        JOIN classes c ON s.classes_id = c.id
+        WHERE s.student_name = ? 
+        ORDER BY s.id DESC 
+        LIMIT 1
+    ");
     $stmt->execute([$name]);
     $row = $stmt->fetch();
+
     if (!$row) {
         echo json_encode(['error' => 'Student not found']);
         exit;
     }
-    $submission_id = (int)$row['id'];
-    $student_class = $row['student_class'];
 
-    // Get individual scores
-    $stmt = $pdo->prepare("SELECT qm.dimension AS dim, AVG(r.value) AS avg_value
-                           FROM responses r
-                           JOIN question_map qm ON r.question_number = qm.question_number
-                           WHERE r.submission_id = ?
-                           GROUP BY qm.dimension");
+    $submission_id = (int)$row['id'];
+    $classes_id = $row['classes_id'];
+    $student_class = $row['class_name'];
+
+    $stmt = $pdo->prepare("
+        SELECT q.dimension AS dim, AVG(r.value) AS avg_value
+        FROM responses r
+        JOIN questions q ON r.questions_idquestions = q.id
+        WHERE r.submission_id = ?
+        GROUP BY q.dimension
+    ");
     $stmt->execute([$submission_id]);
     $dims = ['C' => 0, 'A' => 0, 'R' => 0, 'E' => 0];
     while ($r = $stmt->fetch()) {
         $dims[strtoupper($r['dim'])] = round((float)$r['avg_value'], 2);
     }
 
-    // Get raw responses (optional, for details)
-    $rstmt = $pdo->prepare("SELECT question_number,value FROM responses WHERE submission_id = ?");
+    $rstmt = $pdo->prepare("
+        SELECT q.question_number, r.value 
+        FROM responses r
+        JOIN questions q ON r.questions_idquestions = q.id
+        WHERE r.submission_id = ?
+        ORDER BY q.question_number
+    ");
     $rstmt->execute([$submission_id]);
     $raw = $rstmt->fetchAll();
 
-    // Get class average (for student view)
-    $avgQuery = "SELECT qm.dimension AS dim, AVG(r.value) AS avg_value
-                 FROM responses r
-                 JOIN question_map qm ON r.question_number = qm.question_number
-                 JOIN submissions s ON r.submission_id=s.id
-                 WHERE s.student_class=?
-                 GROUP BY qm.dimension";
+    $avgQuery = "
+        SELECT q.dimension AS dim, AVG(r.value) AS avg_value
+        FROM responses r
+        JOIN questions q ON r.questions_idquestions = q.id
+        JOIN submissions s ON r.submission_id = s.id
+        WHERE s.classes_id = ?
+        GROUP BY q.dimension
+    ";
     $astmt = $pdo->prepare($avgQuery);
-    $astmt->execute([$student_class]);
+    $astmt->execute([$classes_id]);
     $overall = ['C' => 0, 'A' => 0, 'R' => 0, 'E' => 0];
     while ($ar = $astmt->fetch()) {
         $overall[strtoupper($ar['dim'])] = round((float)$ar['avg_value'], 2);
@@ -83,12 +99,13 @@ try {
         'name' => $name,
         'submission_id' => $submission_id,
         'created_at' => $row['created_at'],
+        'student_class' => $student_class,
         'individual' => $dims,
         'responses' => $raw,
         'overall' => $overall
     ]);
 
 } catch (Exception $e) {
-    echo json_encode(['error' => 'Server error']);
+    echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
     exit;
 }

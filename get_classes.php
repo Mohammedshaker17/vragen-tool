@@ -1,16 +1,19 @@
 <?php
-/* API endpoint om alle beschikbare klassen op te halen */
+/* API endpoint om alle beschikbare klassen op te halen - alleen uit classes tabel */
 
 header('Content-Type: application/json');
 require_once __DIR__ . '/database.php';
 
 try {
-    $stmt = $pdo->query("SELECT class_name FROM classes ORDER BY class_name ASC");
+    $stmt = $pdo->query("SELECT id, class_name FROM classes ORDER BY class_name ASC");
     $classes = [];
     while ($row = $stmt->fetch()) {
-        $classes[] = $row['class_name'];
+        $classes[] = [
+            'id' => $row['id'],
+            'name' => $row['class_name']
+        ];
     }
     echo json_encode(['success' => true, 'classes' => $classes]);
 } catch (Exception $e) {
-    echo json_encode(['error' => 'Kan geen klassen ophalen.']);
+    echo json_encode(['error' => 'Kan geen klassen ophalen: ' . $e->getMessage()]);
 }

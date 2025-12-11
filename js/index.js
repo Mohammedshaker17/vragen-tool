@@ -1,46 +1,48 @@
-/* JavaScript voor views/index.php - genereert enquêtevragen en verwerkt formulier inzending */
+/* JavaScript voor views/index.php - dynamically loads questions and answer choices from database */
 
-const answerOptions = [
-    {label: "Ja, meestal wel", value: 5},
-    {label: "Soms, maar ik zou dat graag meer willen.", value: 3},
-    {label: "Soms, maar ik vind dit niet belangrijk.", value: 4},
-    {label: "Nee, maar ik wil dat wel graag.", value: 1},
-    {label: "Nee en dat hoeft voor mij ook niet.", value: 3}
-];
+let questionsData = [];
+let choicesData = [];
 
-const questionTexts = [
-    "1. Ik kan de opdrachten in mijn opleiding uitvoeren.",
-    "2. Ik heb er vertrouwen in dat ik de leerstof begrijp.",
-    "3. Ik krijg de kans om mezelf te ontwikkelen.",
-    "4. Met de feedback die ik krijg kan ik mijn prestaties verbeteren.",
-    "5. Ik heb keuzes in de manier waarop ik mijn lesdoelen bereik.",
-    "6. Ik mag meedenken over de invulling van de lessen.",
-    "7. Ik mag zelf beslissen hoe ik mijn opdrachten maak.",
-    "8. De docenten ondersteunen mijn keuzes.",
-    "9. Ik kan mijn medestudenten om hulp vragen.",
-    "10. Mijn docenten tonen oprechte interesse in mij als persoon.",
-    "11. Ik heb een sterke band met mijn medestudenten.",
-    "12. Ik voel dat ik erbij hoor op school.",
-    "13. Ik ben enthousiast over de lessen en activiteiten in mijn opleiding.",
-    "14. Ik ben actief betrokken bij groepsopdrachten en samenwerkingen.",
-    "15. Ik ben blij met het beroep waarvoor ik word opgeleid.",
-    "16. Ik zet door zelfs als ik een opdracht moeilijk vind."
-];
+async function loadQuestionsAndChoices() {
+    try {
+        const resp = await fetch(BASE_URL + "/get_questions.php");
+        const data = await resp.json();
 
-const qContainer = document.getElementById('questions');
+        if (!data.success) {
+            alert("Fout bij het laden van vragen");
+            return false;
+        }
 
-for (let i = 0; i < questionTexts.length; i++) {
-    const qnum = i + 1;
-    const div = document.createElement('div');
-    div.className = 'vraag';
-    div.innerHTML = `<p>${questionTexts[i]} *</p>`;
-    for (let opt of answerOptions) {
-        div.insertAdjacentHTML(
-            'beforeend',
-            `<label><input type="radio" name="q${qnum}" value="${opt.value}" required> ${opt.label}</label><br>`
-        );
+        questionsData = data.questions;
+        choicesData = data.choices;
+
+        renderQuestions();
+        return true;
+    } catch (error) {
+        console.error("Error loading questions:", error);
+        alert("Kan vragen niet laden");
+        return false;
     }
-    qContainer.appendChild(div);
+}
+
+function renderQuestions() {
+    const qContainer = document.getElementById('questions');
+    qContainer.innerHTML = '';
+
+    for (let question of questionsData) {
+        const div = document.createElement('div');
+        div.className = 'vraag';
+        div.innerHTML = `<p>${question.question_number}. ${question.question_text} *</p>`;
+
+        for (let choice of choicesData) {
+            div.insertAdjacentHTML(
+                'beforeend',
+                `<label><input type="radio" name="q${question.question_number}" value="${choice.choice_value}" required> ${choice.choice_text}</label><br>`
+            );
+        }
+
+        qContainer.appendChild(div);
+    }
 }
 
 document.getElementById('surveyForm').addEventListener('submit', async (e) => {
@@ -56,8 +58,9 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     btn.textContent = "Bezig...";
 
     const responses = {};
-    for (let i = 1; i <= 16; i++) {
-        responses[i] = parseInt(form.get("q" + i), 10);
+    for (let question of questionsData) {
+        const qnum = question.question_number;
+        responses[qnum] = parseInt(form.get("q" + qnum), 10);
     }
     form.set("responses", JSON.stringify(responses));
 
@@ -86,11 +89,14 @@ async function loadClasses() {
     if (data.success && Array.isArray(data.classes)) {
         for (const c of data.classes) {
             const opt = document.createElement("option");
-            opt.value = c;
-            opt.textContent = c;
+            opt.value = c.name;
+            opt.textContent = c.name;
             select.appendChild(opt);
         }
     }
 }
 
-loadClasses();
+window.addEventListener('DOMContentLoaded', async function () {
+    await loadQuestionsAndChoices();
+    await loadClasses();
+});

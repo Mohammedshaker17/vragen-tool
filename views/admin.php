@@ -1,5 +1,5 @@
 <?php
-/* Admin pagina voor het beheren van docenten accounts */
+/* Admin pagina voor het beheren van docenten accounts (nieuwe database structuur) */
 
 session_start();
 
@@ -11,23 +11,29 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != "admin") {
     exit;
 }
 
-if (isset($_POST['username'], $_POST['password'], $_POST['class'])) {
-    $stmt = $pdo->prepare("INSERT INTO users (username,password,role,class) VALUES (?, ?, 'docent', ?)");
+if (isset($_POST['username'], $_POST['password'], $_POST['classes_id'])) {
+    $stmt = $pdo->prepare("INSERT INTO users (username, password, role, classes_id) VALUES (?, ?, 'docent', ?)");
     $stmt->execute([
         $_POST['username'],
         password_hash($_POST['password'], PASSWORD_DEFAULT),
-        $_POST['class']
+        $_POST['classes_id']
     ]);
 
     header("Location: " . url("views/admin.php"));
     exit;
 }
 
-
-$stmt = $pdo->query("SELECT username,class FROM users WHERE role='docent'");
+$stmt = $pdo->query("
+    SELECT u.username, c.class_name, u.classes_id 
+    FROM users u
+    LEFT JOIN classes c ON u.classes_id = c.id
+    WHERE u.role='docent'
+    ORDER BY u.username
+");
 $docenten = $stmt->fetchAll();
-$stmt = $pdo->query("SELECT class_name FROM classes ORDER BY class_name ASC");
-$classes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+$stmt = $pdo->query("SELECT id, class_name FROM classes ORDER BY class_name ASC");
+$classes = $stmt->fetchAll();
 ?>
 <!doctype html>
 <html lang="nl">
@@ -53,10 +59,12 @@ $classes = $stmt->fetchAll(PDO::FETCH_COLUMN);
         <input id="input-soort" name="password" type="password" required><br>
 
         <label>Verbind de docent met een klas:</label><br>
-        <select id="selecteer-klas" name="class" required>
+        <select id="selecteer-klas" name="classes_id" required>
             <option value="">-- Selecteer klas --</option>
             <?php foreach ($classes as $c): ?>
-                <option value="<?php echo htmlspecialchars($c); ?>"><?php echo htmlspecialchars($c); ?></option>
+                <option value="<?php echo htmlspecialchars($c['id']); ?>">
+                    <?php echo htmlspecialchars($c['class_name']); ?>
+                </option>
             <?php endforeach; ?>
         </select><br>
 
@@ -66,10 +74,21 @@ $classes = $stmt->fetchAll(PDO::FETCH_COLUMN);
     <h2>Bestaande docenten</h2>
     <ul>
         <?php foreach ($docenten as $d): ?>
-            <li><?php echo htmlspecialchars($d['username']); ?> - <?php echo htmlspecialchars($d['class']); ?></li>
+            <li>
+                <?php echo htmlspecialchars($d['username']); ?> -
+                <?php echo htmlspecialchars($d['class_name'] ?? 'Geen klas'); ?>
+            </li>
         <?php endforeach; ?>
     </ul>
 
+    <h2>Beheer klassen en vragen</h2>
+    <p>Klassen en vragen kunnen alleen via de database worden beheerd.</p>
+    <p>Gebruik phpMyAdmin of een andere database tool om:</p>
+    <ul>
+        <li>Klassen toe te voegen in de <strong>classes</strong> tabel</li>
+        <li>Vragen toe te voegen/wijzigen in de <strong>questions</strong> tabel</li>
+        <li>Antwoordopties te beheren in de <strong>choices</strong> tabel</li>
+    </ul>
 </div>
 </body>
 </html>

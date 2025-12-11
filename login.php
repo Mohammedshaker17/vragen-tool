@@ -1,5 +1,5 @@
 <?php
-/* Login pagina voor docenten en admins */
+/* Login pagina voor docenten en admins (updated voor nieuwe database structuur) */
 
 session_start();
 require_once __DIR__ . '/config.php';
@@ -11,10 +11,19 @@ if (isset($_POST['username'], $_POST['password'])) {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
     $stmt->execute([$_POST['username']]);
     $user = $stmt->fetch();
+
     if ($user && password_verify($_POST['password'], $user['password'])) {
         $_SESSION['username'] = $user['username'];
         $_SESSION['role'] = $user['role'];
-        if ($user['role'] === 'docent') $_SESSION['class'] = $user['class'];
+
+        if ($user['role'] === 'docent') {
+            $_SESSION['classes_id'] = $user['classes_id'];
+
+            $classStmt = $pdo->prepare("SELECT class_name FROM classes WHERE id = ?");
+            $classStmt->execute([$user['classes_id']]);
+            $classRow = $classStmt->fetch();
+            $_SESSION['class'] = $classRow ? $classRow['class_name'] : '';
+        }
 
         if ($user['role'] === 'admin') {
             header("Location: " . url('views/admin.php'));
@@ -55,7 +64,7 @@ if (isset($_POST['username'], $_POST['password'])) {
 </html>
 
 <style>
-    #input-soort{
+    #input-soort {
         width: 50%;
         padding: 8px;
         margin: 8px 0;

@@ -1,5 +1,5 @@
 <?php
-/* Overzichtspagina voor docenten om studenten uit hun klas te selecteren en grafieken te bekijken */
+/* Overzichtspagina voor docenten (nieuwe database structuur) */
 
 session_start();
 
@@ -12,8 +12,13 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != "docent") {
 
 require_once __DIR__ . '/../database.php';
 
-$stmt = $pdo->prepare("SELECT student_name FROM submissions WHERE student_class=? GROUP BY student_name ORDER BY student_name ASC");
-$stmt->execute([$_SESSION['class']]);
+$stmt = $pdo->prepare("
+    SELECT DISTINCT s.student_name 
+    FROM submissions s
+    WHERE s.classes_id = ?
+    ORDER BY s.student_name ASC
+");
+$stmt->execute([$_SESSION['classes_id']]);
 $students = $stmt->fetchAll(PDO::FETCH_COLUMN);
 ?>
 <!doctype html>
@@ -58,14 +63,12 @@ $students = $stmt->fetchAll(PDO::FETCH_COLUMN);
 <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
 
-    // Dropdown toggle logic
     const dropdown = document.getElementById('studentDropdown');
     const toggleBtn = document.getElementById('dropdownToggle');
-    toggleBtn.addEventListener('click', function(e) {
+    toggleBtn.addEventListener('click', function (e) {
         dropdown.classList.toggle('open');
     });
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
     });
 </script>
@@ -80,10 +83,12 @@ $students = $stmt->fetchAll(PDO::FETCH_COLUMN);
         align-items: flex-start;
         gap: 24px;
     }
+
     .dropdown {
         position: relative;
         min-width: 220px;
     }
+
     .dropdown-btn {
         width: 100%;
         padding: 10px 12px;
@@ -95,6 +100,7 @@ $students = $stmt->fetchAll(PDO::FETCH_COLUMN);
         font-size: 1rem;
         text-align: left;
     }
+
     .dropdown-content {
         display: none;
         position: absolute;
@@ -104,14 +110,16 @@ $students = $stmt->fetchAll(PDO::FETCH_COLUMN);
         min-width: 220px;
         max-height: 320px;
         overflow-y: auto;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         border-radius: 6px;
         z-index: 10;
         padding: 8px 0;
     }
+
     .dropdown.open .dropdown-content {
         display: block;
     }
+
     .dropdown-content label {
         display: flex;
         align-items: center;
@@ -119,14 +127,22 @@ $students = $stmt->fetchAll(PDO::FETCH_COLUMN);
         cursor: pointer;
         font-size: 1rem;
     }
+
     .dropdown-content label:hover {
         background: #f0f0f0;
     }
+
     .dropdown-content input[type=checkbox] {
         margin-right: 8px;
     }
+
     @media (max-width: 900px) {
-        .flex-row { flex-direction: column; }
-        .dropdown { min-width: 100%; }
+        .flex-row {
+            flex-direction: column;
+        }
+
+        .dropdown {
+            min-width: 100%;
+        }
     }
 </style>

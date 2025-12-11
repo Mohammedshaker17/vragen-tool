@@ -31,7 +31,6 @@ async function loadChart(compareWith = "") {
             borderWidth: 2,
             fill: true
         });
-        // document.getElementById("compareLabel").textContent = "Vergelijkt met: " + studentClass;
     } else {
         document.getElementById("compareLabel").textContent = "";
     }
