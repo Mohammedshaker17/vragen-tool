@@ -7,19 +7,31 @@ require_once __DIR__ . '/database.php';
 $submission_id = isset($_GET['submission_id']) ? (int)$_GET['submission_id'] : 0;
 
 if ($submission_id) {
-    $stmt = $pdo->prepare("SELECT student_name, student_class FROM submissions WHERE id = ?");
+    $stmt = $pdo->prepare("
+        SELECT s.student_name, c.class_name 
+        FROM submissions s
+        JOIN classes c ON s.classes_id = c.id
+        WHERE s.id = ?
+    ");
     $stmt->execute([$submission_id]);
     $row = $stmt->fetch();
     $name = $row ? $row['student_name'] : '';
-    $class = $row ? $row['student_class'] : '';
+    $class = $row ? $row['class_name'] : '';
 } else {
     $name = isset($_GET['name']) ? trim($_GET['name']) : '';
     $class = '';
     if ($name) {
-        $stmt = $pdo->prepare("SELECT student_class FROM submissions WHERE student_name=? ORDER BY id DESC LIMIT 1");
+        $stmt = $pdo->prepare("
+            SELECT c.class_name 
+            FROM submissions s
+            JOIN classes c ON s.classes_id = c.id
+            WHERE s.student_name = ? 
+            ORDER BY s.id DESC 
+            LIMIT 1
+        ");
         $stmt->execute([$name]);
         $r = $stmt->fetch();
-        $class = $r ? $r['student_class'] : '';
+        $class = $r ? $r['class_name'] : '';
     }
 }
 ?>
@@ -40,8 +52,9 @@ if ($submission_id) {
     </p>
 
     <label for="compareName">Vergelijk jouw grafiek met het klassen gemiddelde</label><br><br>
-    <label for="compareName">Note: er moeten meerdere studenten de lijst hebben ingevuld wilt er een gemiddelde uitkomen.<br><br>
-    Staat er nog geen gemiddelde? Refresh de pagina dan nadat andere studenten te lijst hebben verstuurd.</label>
+    <label for="compareName">Note: er moeten meerdere studenten de lijst hebben ingevuld wilt er een gemiddelde
+        uitkomen.<br><br>
+        Staat er nog geen gemiddelde? Refresh de pagina dan nadat andere studenten te lijst hebben verstuurd.</label>
     <select id="compareName">
         <option value="">Geen vergelijking</option>
         <?php if ($class): ?>

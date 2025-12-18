@@ -64,7 +64,7 @@ if (isset($_POST['username'], $_POST['password'])) {
 </html>
 
 <style>
-    #input-soort {
+    #input-soort{
         width: 50%;
         padding: 8px;
         margin: 8px 0;

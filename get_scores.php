@@ -22,7 +22,7 @@ try {
 
         $avgQuery = "SELECT q.dimension AS dim, AVG(r.value) AS avg_value
                      FROM responses r
-                     JOIN questions q ON r.questions_idquestions = q.id
+                     JOIN questions q ON r.questions_idquestions = q.idquestions
                      JOIN submissions s ON r.submission_id = s.id
                      WHERE s.classes_id = ?
                      GROUP BY q.dimension";
@@ -59,7 +59,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT q.dimension AS dim, AVG(r.value) AS avg_value
         FROM responses r
-        JOIN questions q ON r.questions_idquestions = q.id
+        JOIN questions q ON r.questions_idquestions = q.idquestions
         WHERE r.submission_id = ?
         GROUP BY q.dimension
     ");
@@ -72,7 +72,7 @@ try {
     $rstmt = $pdo->prepare("
         SELECT q.question_number, r.value 
         FROM responses r
-        JOIN questions q ON r.questions_idquestions = q.id
+        JOIN questions q ON r.questions_idquestions = q.idquestions
         WHERE r.submission_id = ?
         ORDER BY q.question_number
     ");
@@ -82,7 +82,7 @@ try {
     $avgQuery = "
         SELECT q.dimension AS dim, AVG(r.value) AS avg_value
         FROM responses r
-        JOIN questions q ON r.questions_idquestions = q.id
+        JOIN questions q ON r.questions_idquestions = q.idquestions
         JOIN submissions s ON r.submission_id = s.id
         WHERE s.classes_id = ?
         GROUP BY q.dimension
