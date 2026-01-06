@@ -1,7 +1,4 @@
 <?php
-// File: `save.php`
-// Accept responses keyed by idquestions or question_number (also accepts keys like "q12").
-// Resolve keys to `questions_idquestions` AND include question_number when saving.
 
 header("Content-Type: application/json; charset=utf-8");
 require_once __DIR__ . '/database.php';
@@ -33,7 +30,6 @@ if ($name === '' || $class === '') {
 
 try {
 
-    // Validate class
     $classCheck = $pdo->prepare("SELECT id FROM classes WHERE class_name = ?");
     $classCheck->execute([$class]);
     $classRow = $classCheck->fetch();
@@ -51,7 +47,6 @@ try {
         exit;
     }
 
-    // Load all questions AND store question_number for each id
     $qstmt = $pdo->query("SELECT idquestions, question_number FROM questions");
     $byId = [];
     $byNumber = [];
@@ -75,7 +70,6 @@ try {
         exit;
     }
 
-    // Resolve incoming keys to idquestions
     $mapped = [];
     $unmapped = [];
 
@@ -110,14 +104,12 @@ try {
         exit;
     }
 
-    // Insert submission and responses
     $pdo->beginTransaction();
 
     $insSub = $pdo->prepare("INSERT INTO submissions (student_name, classes_id, open_text) VALUES (?, ?, ?)");
     $insSub->execute([$name, $classes_id, $open_text]);
     $submission_id = (int)$pdo->lastInsertId();
 
-    // UPDATED: insert includes `question_number`
     $rstmt = $pdo->prepare("
         INSERT INTO responses 
             (submission_id, questions_idquestions, question_number, value) 

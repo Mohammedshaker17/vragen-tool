@@ -1,5 +1,3 @@
-/* JavaScript voor grafiek.php - toont persoonlijke grafiek met optionele vergelijking */
-
 let radarChart = null;
 
 async function loadChart(compareWith = "") {

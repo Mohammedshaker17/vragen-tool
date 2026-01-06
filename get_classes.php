@@ -1,5 +1,4 @@
 <?php
-/* API endpoint om alle beschikbare klassen op te halen - alleen uit classes tabel */
 
 header('Content-Type: application/json');
 require_once __DIR__ . '/database.php';

@@ -1,5 +1,4 @@
 <?php
-/* Toont de persoonlijke grafiek van een student met optie om te vergelijken met klasgemiddelde */
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/database.php';

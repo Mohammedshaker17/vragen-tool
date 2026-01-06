@@ -1,6 +1,4 @@
 <?php
-// File: `views/admin.php`
-/* Admin page: create classes, create/edit/delete docent accounts, attach multiple classes to docents. */
 
 session_start();
 require_once __DIR__ . '/../config.php';
@@ -11,7 +9,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== "admin") {
     exit;
 }
 
-// Ensure teacher_classes mapping table exists
 $pdo->exec("
     CREATE TABLE IF NOT EXISTS teacher_classes (
         user_id INT NOT NULL,
@@ -24,10 +21,8 @@ $pdo->exec("
 
 $error = '';
 
-// Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // Create class
         if (isset($_POST['action']) && $_POST['action'] === 'create_class' && !empty($_POST['class_name'])) {
             $stmt = $pdo->prepare("INSERT INTO classes (class_name) VALUES (?)");
             $stmt->execute([trim($_POST['class_name'])]);
@@ -35,7 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Create teacher
         if (isset($_POST['action']) && $_POST['action'] === 'create_teacher') {
             $username = trim($_POST['username'] ?? '');
             $password = $_POST['password'] ?? '';
@@ -45,14 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("Gebruikersnaam en wachtwoord zijn verplicht");
             }
 
-            // Ensure username unique
             $check = $pdo->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
             $check->execute([$username]);
             if ($check->fetch()) {
                 throw new Exception("Gebruikersnaam bestaat al");
             }
 
-            // Normalize class ids
             $classes_ids = array_values(array_filter(array_map(function ($v) {
                 return (int)$v > 0 ? (int)$v : null;
             }, $classes_ids)));
@@ -76,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Edit teacher (safe, validates username uniqueness, updates mapping, optional password)
         if (isset($_POST['action']) && $_POST['action'] === 'edit_teacher') {
             $user_id = (int)($_POST['user_id'] ?? 0);
             $username = trim($_POST['username'] ?? '');
@@ -90,12 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception("Gebruikersnaam mag niet leeg zijn");
             }
 
-            // Normalize class ids to integers and remove empties
             $classes_ids = array_values(array_filter(array_map(function($v){
                 return (int)$v > 0 ? (int)$v : null;
             }, $classes_ids)));
 
-            // Ensure username uniqueness (excluding current user)
             $check = $pdo->prepare("SELECT id FROM users WHERE username = ? AND id != ? LIMIT 1");
             $check->execute([$username, $user_id]);
             if ($check->fetch()) {
@@ -104,7 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $pdo->beginTransaction();
 
-            // Build update query dynamically (only include password if provided)
             $params = [$username];
             $sql = "UPDATE users SET username = ?";
 
@@ -119,7 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
 
-            // Replace teacher_classes entries
             $del = $pdo->prepare("DELETE FROM teacher_classes WHERE user_id = ?");
             $del->execute([$user_id]);
 
@@ -135,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Delete teacher
         if (isset($_POST['action']) && $_POST['action'] === 'delete_teacher') {
             $user_id = (int)($_POST['user_id'] ?? 0);
             if ($user_id <= 0) throw new Exception("Ongeldig gebruikers-id");
@@ -152,7 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch classes and teachers for rendering
 $classes = [];
 try {
     $stmt = $pdo->query("SELECT id, class_name FROM classes ORDER BY class_name ASC");
@@ -163,7 +148,6 @@ try {
 
 $teachers = [];
 try {
-    // Fetch teachers and their classes (names and ids, '||' separated)
     $stmt = $pdo->query("
         SELECT u.id, u.username,
                GROUP_CONCAT(c.class_name ORDER BY c.class_name SEPARATOR '||') AS classes,
@@ -284,7 +268,6 @@ try {
                         </td>
                     </tr>
 
-                    <!-- Inline edit form row -->
                     <tr class="inline-form-row" id="inline-form-<?php echo (int)$t['id']; ?>">
                         <td colspan="3">
                             <form method="post" id="editForm-<?php echo (int)$t['id']; ?>">
@@ -329,7 +312,6 @@ try {
 </div>
 
 <script>
-    // Toggle inline edit form and populate values (use class IDs for accurate checkbox matching)
     document.querySelectorAll('.editBtn').forEach(btn => {
         btn.addEventListener('click', function () {
             const uid = this.dataset.userid;
@@ -339,23 +321,17 @@ try {
             const form = document.getElementById('editForm-' + uid);
             if (!inlineRow || !form) return;
 
-            // Toggle visibility
             const isVisible = inlineRow.style.display === 'table-row';
-            // hide any other open forms
             document.querySelectorAll('.inline-form-row').forEach(r => r.style.display = 'none');
 
             if (!isVisible) {
                 inlineRow.style.display = 'table-row';
-                // populate username
                 form.querySelector('input[name="username"]').value = uname;
-                // clear password
                 form.querySelector('input[name="password"]').value = '';
-                // uncheck all class checkboxes then check ones that belong by ID
                 const selectedIds = classIdsRaw ? classIdsRaw.split('||') : [];
                 form.querySelectorAll('.edit-classes-container input[type="checkbox"]').forEach(cb => {
                     cb.checked = selectedIds.includes(cb.value);
                 });
-                // scroll to inline form for UX
                 inlineRow.scrollIntoView({behavior: "smooth", block: "center"});
             } else {
                 inlineRow.style.display = 'none';
@@ -363,7 +339,6 @@ try {
         });
     });
 
-    // cancel button hides the inline edit form
     document.querySelectorAll('.cancelEdit').forEach(btn => {
         btn.addEventListener('click', function () {
             const row = this.closest('.inline-form-row');
@@ -371,7 +346,6 @@ try {
         });
     });
 
-    // Improve UX: when create teacher form submitted, disable button to prevent double submits
     const createForm = document.getElementById('createTeacherForm');
     if (createForm) {
         createForm.addEventListener('submit', function (e) {
@@ -383,7 +357,6 @@ try {
         });
     }
 
-    // When inline edit forms are submitted, disable submit to prevent double submits
     document.querySelectorAll('form[id^="editForm-"]').forEach(f => {
         f.addEventListener('submit', function () {
             const btn = this.querySelector('button[type=submit]');

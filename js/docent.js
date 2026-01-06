@@ -1,9 +1,6 @@
-/* JavaScript for docent view - assigns distinct colors per person */
-
 let radarChart = null;
 
 function colorForName(name) {
-    // Simple string-to-hue hash -> returns border and background colors
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
         hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -16,7 +13,7 @@ function colorForName(name) {
 
 async function loadChart(selectedNames) {
     const datasets = [];
-    const openResponses = []; // collect {name, open_text, created_at}
+    const openResponses = [];
     const dims = ["C", "A", "R", "E"];
     const labels = ["Competentie", "Autonomie", "Relatie", "Engagement"];
 

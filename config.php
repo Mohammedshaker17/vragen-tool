@@ -1,5 +1,4 @@
 <?php
-/* Configuratie bestand voor automatische pad- en URL-detectie, werkt op localhost en live servers */
 
 define('BASE_PATH', __DIR__);
 

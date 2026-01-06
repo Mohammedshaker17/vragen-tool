@@ -1,5 +1,4 @@
 <?php
-/* Database connectie configuratie voor MySQL */
 
 require_once __DIR__ . '/config.php';
 

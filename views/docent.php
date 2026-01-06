@@ -1,5 +1,4 @@
 <?php
-// File: `views/docent.php` - updated to allow teacher to pick which class to view
 
 session_start();
 require_once __DIR__ . '/../config.php';
@@ -10,7 +9,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'docent') {
     exit;
 }
 
-// Ensure we know the current user id (login sets username)
 $userId = null;
 if (!empty($_SESSION['username'])) {
     $uStmt = $pdo->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
@@ -19,27 +17,22 @@ if (!empty($_SESSION['username'])) {
     if ($uRow) $userId = (int)$uRow['id'];
 }
 
-// Handle class selection form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['selected_class'])) {
     $selected = (int)$_POST['selected_class'];
     if ($selected > 0) {
         $_SESSION['classes_id'] = $selected;
-        // also set human-readable class name
         $cstmt = $pdo->prepare("SELECT class_name FROM classes WHERE id = ? LIMIT 1");
         $cstmt->execute([$selected]);
         $crow = $cstmt->fetch();
         $_SESSION['class'] = $crow ? $crow['class_name'] : '';
     } else {
-        // Clear selection
         unset($_SESSION['classes_id']);
         $_SESSION['class'] = '';
     }
-    // reload to show selected class students
     header("Location: " . url('views/docent.php'));
     exit;
 }
 
-// Fetch classes assigned to this teacher
 $assignedClasses = [];
 if ($userId) {
     try {
@@ -57,22 +50,18 @@ if ($userId) {
     }
 }
 
-// Determine active class: prefer session value, fallback to first assigned class
 $activeClassId = null;
 if (isset($_SESSION['classes_id']) && (int)$_SESSION['classes_id'] > 0) {
     $activeClassId = (int)$_SESSION['classes_id'];
 } elseif (!empty($assignedClasses)) {
     $activeClassId = (int)$assignedClasses[0]['id'];
-    // keep session in sync
     $_SESSION['classes_id'] = $activeClassId;
     $_SESSION['class'] = $assignedClasses[0]['class_name'];
 }
 
-// Handle student deletion (teacher removes a student and all their submissions for the active class)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_student') {
     $studentName = trim($_POST['student_name'] ?? '');
     if ($studentName === '' || $activeClassId === null) {
-        // invalid request or no active class
         header("Location: " . url('views/docent.php'));
         exit;
     }
@@ -80,20 +69,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     try {
         $pdo->beginTransaction();
 
-        // Find all submission ids for this student in the active class
         $sstmt = $pdo->prepare("SELECT id FROM submissions WHERE student_name = ? AND classes_id = ?");
         $sstmt->execute([$studentName, $activeClassId]);
         $ids = $sstmt->fetchAll(PDO::FETCH_COLUMN, 0);
 
         if (!empty($ids)) {
-            // safe since values are integers fetched from DB
             $ids = array_map('intval', $ids);
             $in = implode(',', $ids);
 
-            // delete related responses first
             $pdo->exec("DELETE FROM responses WHERE submission_id IN ($in)");
 
-            // then delete submissions
             $pdo->exec("DELETE FROM submissions WHERE id IN ($in)");
         }
 
@@ -102,7 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         exit;
     } catch (Exception $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();
-        // swallow or optionally log; reload page with no crash
         header("Location: " . url('views/docent.php'));
         exit;
     }
@@ -111,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $students = [];
 try {
     if ($activeClassId === null) {
-        // no class selected/assigned -> leave students empty
         $students = [];
     } else {
         $stmt = $pdo->prepare("
@@ -209,7 +192,6 @@ try {
 <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
 
-    // Dropdown toggle
     const dropdown = document.getElementById('studentDropdown');
     const toggleBtn = document.getElementById('dropdownToggle');
     toggleBtn.addEventListener('click', function(e) {

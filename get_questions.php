@@ -1,5 +1,4 @@
 <?php
-/* API endpoint to fetch all questions with their answer choices */
 
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/database.php';

@@ -1,5 +1,4 @@
 <?php
-// File: `login.php` (updated to read teacher-class mappings)
 
 session_start();
 require_once __DIR__ . '/config.php';
