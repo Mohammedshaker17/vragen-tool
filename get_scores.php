@@ -1,5 +1,5 @@
 <?php
-/* API endpoint om scores en gemiddelden van een student op te halen (nieuwe database structuur) */
+// Adds `open_text` to the individual-student JSON response.
 
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/database.php';
@@ -36,8 +36,9 @@ try {
         exit;
     }
 
+    // include open_text from submissions
     $stmt = $pdo->prepare("
-        SELECT s.id, s.classes_id, s.created_at, c.class_name 
+        SELECT s.id, s.classes_id, s.created_at, c.class_name, s.open_text
         FROM submissions s
         JOIN classes c ON s.classes_id = c.id
         WHERE s.student_name = ? 
@@ -55,6 +56,7 @@ try {
     $submission_id = (int)$row['id'];
     $classes_id = $row['classes_id'];
     $student_class = $row['class_name'];
+    $open_text = isset($row['open_text']) ? $row['open_text'] : '';
 
     $stmt = $pdo->prepare("
         SELECT q.dimension AS dim, AVG(r.value) AS avg_value
@@ -102,10 +104,12 @@ try {
         'student_class' => $student_class,
         'individual' => $dims,
         'responses' => $raw,
-        'overall' => $overall
+        'overall' => $overall,
+        'open_text' => $open_text
     ]);
 
 } catch (Exception $e) {
     echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
     exit;
 }
+?>

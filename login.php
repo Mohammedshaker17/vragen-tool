@@ -1,5 +1,5 @@
 <?php
-/* Login pagina voor docenten en admins (updated voor nieuwe database structuur) */
+// File: `login.php` (updated to read teacher-class mappings)
 
 session_start();
 require_once __DIR__ . '/config.php';
@@ -17,20 +17,34 @@ if (isset($_POST['username'], $_POST['password'])) {
         $_SESSION['role'] = $user['role'];
 
         if ($user['role'] === 'docent') {
-            $_SESSION['classes_id'] = $user['classes_id'];
+            // Fetch all class IDs assigned to this teacher from the mapping table
+            $tcStmt = $pdo->prepare("SELECT class_id FROM teacher_classes WHERE user_id = ?");
+            $tcStmt->execute([$user['id']]);
+            $classes = $tcStmt->fetchAll(PDO::FETCH_COLUMN, 0);
 
-            $classStmt = $pdo->prepare("SELECT class_name FROM classes WHERE id = ?");
-            $classStmt->execute([$user['classes_id']]);
-            $classRow = $classStmt->fetch();
-            $_SESSION['class'] = $classRow ? $classRow['class_name'] : '';
+            // Normalize to integer array
+            $classes_ids = array_map('intval', $classes ?: []);
+            $_SESSION['classes_ids'] = $classes_ids;
+
+            // For compatibility with existing code that expects a single classes_id,
+            // set the session to the first assigned class (or null if none)
+            $_SESSION['classes_id'] = count($classes_ids) ? $classes_ids[0] : null;
+
+            if ($_SESSION['classes_id']) {
+                $classStmt = $pdo->prepare("SELECT class_name FROM classes WHERE id = ?");
+                $classStmt->execute([$_SESSION['classes_id']]);
+                $classRow = $classStmt->fetch();
+                $_SESSION['class'] = $classRow ? $classRow['class_name'] : '';
+            } else {
+                $_SESSION['class'] = '';
+            }
+
+            header("Location: " . url('views/docent.php'));
+            exit;
         }
 
         if ($user['role'] === 'admin') {
             header("Location: " . url('views/admin.php'));
-            exit;
-        }
-        if ($user['role'] === 'docent') {
-            header("Location: " . url('views/docent.php'));
             exit;
         }
     } else {

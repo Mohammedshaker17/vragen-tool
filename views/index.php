@@ -8,7 +8,7 @@ if (isset($_COOKIE['submission_id'])) {
     header("Location: " . url("grafiek.php?submission_id=$submission_id"));
     exit;
 }
-?>
+?> 
 <!doctype html>
 <html lang="nl">
 <head>
